@@ -168,6 +168,36 @@ Each run is unique and unrepeatable. The program you wrote becomes a different p
 
 A loop that uses <code>!</code> to read the wear level of its own next instruction. On first run, it outputs <code>012</code> — the wear accumulating as the loop iterates. The program is watching itself decay in real-time. But <code>!</code> causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure. On re-runs, the eroded loop produces shorter, noisier output — the observer has been observed to death.
 
+=== cascade.pal — erosion thermometer (16 instructions) ===
+
+<pre>
+++++++++++[>!<-]
+</pre>
+
+A loop that counts its own wear. Set cell 0 to 10, then iterate: move right, output the wear level of the next instruction, move left, decrement. On a fresh run, this produces ascending digits — <code>0</code>, <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code> — as each pass through the loop increases the wear of the instructions inside it.
+
+The loop self-destructs after 3–5 iterations, cutting the count short. The program is a thermometer measuring its own heat, and the measurement accelerates the heating.
+
+<pre>
+$ python3 palimpsest.py examples/cascade.pal --dry-run --seed 25
+01234
+</pre>
+
+=== chamber.pal — echo chamber (21 instructions) ===
+
+<pre>
+,....................
+</pre>
+
+Read one character from input, then echo it 20 times. On first run: perfect echo. Type <code>K</code>, get <code>KKKKKKKKKKKKKKKKKKKK</code>.
+
+On re-runs, the <code>,</code> (input) and <code>.</code> (output) commands erode. The program gradually loses the ability to hear and to speak. The <code>,</code> command is Palimpsest's only connection to the outside world — when it erodes, the program goes deaf. When <code>.</code> erodes, it goes mute. The echo becomes silence.
+
+<pre>
+$ echo -n "K" | python3 palimpsest.py examples/chamber.pal
+KKKKKKKKKKKKKKKKKKKK
+</pre>
+
 == Design philosophy ==
 
 === The LeWitt connection ===

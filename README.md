@@ -188,6 +188,36 @@ On re-runs, the eroded loop produces shorter, noisier output — the observer it
 
 Each `!` reads the wear of the next instruction. On first run: all zeros (fresh program). Each `!` causes wear on itself, so the program is reading its own degradation in real-time. Re-run the eroded source and see a different landscape.
 
+### cascade.pal — Erosion thermometer (16 instructions)
+
+```
+++++++++++[>!<-]
+```
+
+A loop that counts its own wear. Set cell 0 to 10, then iterate: move right, output the wear level of the next instruction, move left, decrement. On a fresh run, this produces ascending digits — `0`, `1`, `2`, `3`, `4` — as each pass through the loop increases the wear of the instructions inside it. The program is a thermometer measuring its own heat.
+
+The loop self-destructs after 3–5 iterations (depending on erosion randomness), cutting the count short. The observation accelerates the thing observed.
+
+```
+$ python3 palimpsest.py examples/cascade.pal --dry-run --seed 25
+01234
+```
+
+### chamber.pal — Echo chamber (21 instructions)
+
+```
+,....................
+```
+
+Read one character from input, then echo it 20 times. On first run: perfect echo. Type `K`, get `KKKKKKKKKKKKKKKKKKKK`.
+
+On re-runs, the `,` (input) and `.` (output) commands erode. The program gradually loses the ability to hear and to speak. The `,` command is Palimpsest's only connection to the outside world — when it erodes, the program goes deaf. When `.` erodes, it goes mute. The echo becomes silence.
+
+```
+$ echo -n "K" | python3 palimpsest.py examples/chamber.pal
+KKKKKKKKKKKKKKKKKKKK
+```
+
 ## Philosophy
 
 Every Palimpsest program is a collaboration between intent and entropy. The programmer writes something, and the language transforms it. The output is never quite what was intended, but carries traces of the original purpose — like a memory recalled too many times.
