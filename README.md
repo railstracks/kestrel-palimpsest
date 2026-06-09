@@ -150,15 +150,51 @@ Requires Python 3.10+.
 
 Brainfuck "H" (8 × 9 = 72). The loop body executes 8 times each — P(erosion) reaches 62% per instruction by the last iteration. Compare with `straight_h.pal`: same output on paper, completely different reliability. Palimpsest rewards verbosity and punishes compression.
 
-### straight_bye.pal — "BYE" (straight-line)
+### lineage.pal — Program evolution
 
 ```
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
->++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
->+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
 ```
 
-Three characters via direct increment. Long but reliable. Run it multiple times and watch the characters drift one by one.
+A straight-line program that prints two characters. The interest is in running it repeatedly. Each run erodes the source, and eroded instructions form **new bracket pairs** — creating loops that didn't exist in the original program.
+
+This is the transformative demo. The program doesn't degrade to noise — it **evolves into a different program**:
+
+- Generation 1: outputs `HK` (close to intended). Source still recognizable.
+- Generation 2: new loops formed from erosion brackets. Output becomes a digit cascade. A different algorithm.
+- Generation 3: source is genuinely alien. Completely different computation.
+
+Run 2 is not "broken Run 1" — it is a new program that emerged from Run 1's erosion.
+
+### farewell.pal — "HEY" (straight-line, 235 instructions)
+
+```
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+```
+
+Three characters, each built with direct increments. On first run, it produces `HEY`. On re-runs, the program degrades progressively — characters drift, `!` commands left by erosion output wear digits, and the output converges toward noise:
+
+```
+Run 1: HEY
+Run 2: 012233415250050033
+Run 3: 0500010000ÿ00110000
+Run 4: 000010000ÿ0ÿ0
+Run 5: 00
+```
+
+Each run is unique and unrepeatable. The program you wrote becomes a different program.
+
+### observer.pal — Self-aware loop (16 instructions)
+
+```
+++++++[>!<-]>++.
+```
+
+A loop that uses `!` to read the wear level of its own next instruction. On first run, it outputs `0`, `1`, `2` — the wear accumulating as the loop iterates. The program is watching itself decay in real-time. But `!` causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure.
+
+On re-runs, the eroded loop produces shorter, noisier output — the observer itself has been observed to death.
 
 ### survey.pal — Self-inspection (54 `!` commands)
 

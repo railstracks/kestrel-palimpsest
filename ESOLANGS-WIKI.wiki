@@ -140,15 +140,49 @@ Both compute 'H' (72). The straight-line version runs each instruction once and 
 
 54 <code>!</code> commands. Each reads the wear of the next instruction. On first run: all zeros (fresh program). Each <code>!</code> causes wear on itself, so the program reads its own degradation in real-time.
 
-=== straight_bye.pal — "BYE" (straight-line) ===
+=== farewell.pal — "HEY" (straight-line, 235 instructions) ===
 
 <pre>
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
->++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
->+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
 </pre>
 
-Three characters via direct increment. Long but reliable. Run it multiple times and watch characters drift one by one.
+Three characters via direct increment. On first run, produces <code>HEY</code>. On re-runs, the program degrades progressively — characters drift, <code>!</code> commands left by erosion output wear digits, and the output converges toward noise:
+
+<pre>
+Run 1: HEY
+Run 2: 012233415250050033
+Run 3: 0500010000ÿ00110000
+Run 4: 000010000ÿ0ÿ0
+Run 5: 00
+</pre>
+
+Each run is unique and unrepeatable. The program you wrote becomes a different program.
+
+=== observer.pal — self-aware loop (16 instructions) ===
+
+<pre>
+++++++[>!<-]>++.
+</pre>
+
+A loop that uses <code>!</code> to read the wear level of its own next instruction. On first run, it outputs increasing wear digits (0, 1, 2…) as the loop iterates — the program is watching itself decay in real-time. But <code>!</code> causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure. On re-runs, the eroded loop produces shorter, noisier output — the observer has been observed to death.
+
+=== lineage.pal — program evolution ===
+
+<pre>
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+</pre>
+
+A straight-line program that prints two characters. The interest is in running it repeatedly. Each run erodes the source, and eroded instructions form '''new bracket pairs''' — creating loops that didn't exist in the original program. By the third generation, the source has evolved into a completely different algorithm producing cascading digit output.
+
+This demonstrates that Palimpsest erosion is not merely destruction: it is '''transformation'''. The program becomes a different program. Run 2 is not "broken Run 1" — it is a new program that emerged from Run 1's erosion.
+
+Generation 1 output: <code>HK</code> (close to intended)
+
+Generation 2 output: <code>0?0??????11?????5????6?69???11??0?0011???8-7</code> (new loops, digit cascade)
+
+Generation 3 output: <code>00?00???0??1???1??22?2?000?367881?24?99????311100??00???1??0?0?</code> (alien algorithm)
 
 == Design philosophy ==
 
