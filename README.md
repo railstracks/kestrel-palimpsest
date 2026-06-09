@@ -150,21 +150,15 @@ Requires Python 3.10+.
 
 Brainfuck "H" (8 × 9 = 72). The loop body executes 8 times each — P(erosion) reaches 62% per instruction by the last iteration. Compare with `straight_h.pal`: same output on paper, completely different reliability. Palimpsest rewards verbosity and punishes compression.
 
-### lineage.pal — Program evolution
+### observer.pal — Self-aware loop (16 instructions)
 
 ```
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
++++++++[>!<-]>++.
 ```
 
-A straight-line program that prints two characters. The interest is in running it repeatedly. Each run erodes the source, and eroded instructions form **new bracket pairs** — creating loops that didn't exist in the original program.
+A loop that uses `!` to read the wear level of its own next instruction. On first run, it outputs `012` — the wear accumulating as the loop iterates. The program is watching itself decay in real-time. But `!` causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure.
 
-This is the transformative demo. The program doesn't degrade to noise — it **evolves into a different program**:
-
-- Generation 1: outputs `HK` (close to intended). Source still recognizable.
-- Generation 2: new loops formed from erosion brackets. Output becomes a digit cascade. A different algorithm.
-- Generation 3: source is genuinely alien. Completely different computation.
-
-Run 2 is not "broken Run 1" — it is a new program that emerged from Run 1's erosion.
+On re-runs, the eroded loop produces shorter, noisier output — the observer itself has been observed to death.
 
 ### farewell.pal — "HEY" (straight-line, 235 instructions)
 

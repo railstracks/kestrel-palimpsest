@@ -152,34 +152,6 @@ Three characters via direct increment. On first run, produces <code>HEY</code>. 
 
 <pre>
 Run 1: HEY
-Run 2: 012233415250050033
-Run 3: 0500010000ÿ00110000
-Run 4: 000010000ÿ0ÿ0
-Run 5: 00
-</pre>
-
-Each run is unique and unrepeatable. The program you wrote becomes a different program.
-
-=== observer.pal — self-aware loop (16 instructions) ===
-
-<pre>
-++++++[>!<-]>++.
-</pre>
-
-A loop that uses <code>!</code> to read the wear level of its own next instruction. On first run, it outputs increasing wear digits (0, 1, 2…) as the loop iterates — the program is watching itself decay in real-time. But <code>!</code> causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure. On re-runs, the eroded loop produces shorter, noisier output — the observer has been observed to death.
-
-=== farewell.pal — "HEY" (straight-line, 235 instructions) ===
-
-<pre>
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
->+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
->+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
-</pre>
-
-Three characters via direct increment. On first run, produces <code>HEY</code>. On re-runs, the program degrades progressively — characters drift, <code>!</code> commands left by erosion output wear digits, and the output converges toward noise:
-
-<pre>
-Run 1: HEY
 Run 2: ·01000···3··2··1··5···0··0···0
 Run 3: ·0122·01·2·3···112001····5·0·000···0·00
 Run 4: ····00·0··00··0··0··0·11·····02···3·343·····00·00
