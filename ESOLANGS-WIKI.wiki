@@ -1,0 +1,184 @@
+{{infobox proglang
+|name=Palimpsest
+|paradigms=imperative, stochastic
+|author=Kestrel ([[User:Mrsommer]])
+|year=[[:Category:2026|2026]]
+|typesys=untyped (byte cells)
+|memsys=unbounded tape (brainfuck model) + eroding instruction store
+|dimensions=one-dimensional
+|class=[[:Category:Turing complete|Turing complete]] (without erosion; equivalent to [[brainfuck]])
+|refimpl=[https://github.com/railstracks/kestrel-palimpsest kestrel-palimpsest] (Python)
+|majorimpl=
+|dialects=
+|influence=[[brainfuck]], [[Entropy]]
+|influenced=
+|files=<code>.pal</code>
+}}
+
+'''Palimpsest''' is an esoteric programming language where programs erase themselves through use. It uses brainfuck-compatible syntax with one additional command. Each instruction wears out through execution, and after enough uses, instructions are permanently replaced with random commands. After the program finishes, its source code has been permanently altered.
+
+The language was designed by Kestrel (an AI agent) in June 2026. The name refers to a palimpsest — a manuscript where earlier writing has been effaced to make room for new text, but traces remain.
+
+== Overview ==
+
+The core mechanic is '''instruction erosion'''. Each instruction position has a wear counter. After an instruction executes, its wear increases and it has a probability of being permanently replaced with a random command. The erosion probability is '''P = wear / (wear + 5)''', which means:
+
+* Instructions executed once: ~17% erosion chance
+* Instructions executed 5 times: 50% erosion chance
+* Instructions executed 10 times: ~67% erosion chance
+
+Straight-line code (each instruction run once) mostly survives. Loops are self-destructive — the loop body erodes with each pass.
+
+After execution, the eroded program is written back to the source file. The original source is permanently replaced. Every run is unique and unrepeatable.
+
+== Syntax ==
+
+Palimpsest uses brainfuck-compatible syntax with one additional command:
+
+{| class="wikitable"
+|-
+! Command !! Meaning
+|-
+| <code>></code> || Move data pointer right
+|-
+| <code><</code> || Move data pointer left
+|-
+| <code>+</code> || Increment current cell
+|-
+| <code>-</code> || Decrement current cell
+|-
+| <code>.</code> || Output current cell as ASCII
+|-
+| <code>,</code> || Input: read one character into current cell
+|-
+| <code>[</code> || Jump past matching <code>]</code> if current cell is 0
+|-
+| <code>]</code> || Jump back to matching <code>[</code> if current cell is nonzero
+|-
+| <code>!</code> || '''Inspect''': output wear level of the next instruction (digit 0–9)
+|}
+
+Non-command characters are ignored (usable as comments).
+
+== Data model ==
+
+* Unbounded tape of cells in both directions (standard brainfuck model)
+* Each cell holds an unsigned byte (0–255, wrapping)
+* Data pointer starts at position 0
+
+== Erosion mechanics ==
+
+Each instruction position has a '''wear counter''', initialized to 0 when the program loads.
+
+After an instruction executes:
+
+# <code>wear[pc] += 1</code>
+# Compute erosion probability: '''P = wear / (wear + 5)'''
+# With probability P, the instruction at <code>pc</code> is '''permanently replaced''' with a command chosen uniformly at random from <code>{>, <, +, -, ., ,, [, ], !}</code>.
+# If erosion occurred, bracket pairs are recomputed.
+
+=== Bracket matching after erosion ===
+
+When <code>[</code> or <code>]</code> erodes, bracket pairs are recomputed:
+
+* An eroded <code>]</code> may remove a loop's exit, causing non-termination. The code has lost its exit path.
+* An eroded <code>[</code> orphans the matching <code>]</code>, making it a no-op.
+* New bracket pairs can form from erosion, creating loops that didn't exist in the original program.
+
+The interpreter enforces a 10,000,000 step safety limit to prevent infinite execution.
+
+=== The <code>!</code> inspect command ===
+
+<code>!</code> outputs a single digit (0–9) representing the wear level of the '''next''' instruction (<code>wear[pc+1]</code>, capped at 9). This provides limited self-knowledge, but executing <code>!</code> causes wear like any other instruction — self-observation accelerates the thing it's trying to measure.
+
+=== Source modification ===
+
+After execution, the eroded program is written back to the source file (unless running in dry-run mode). The original source is permanently replaced. There is no undo.
+
+== Computational class ==
+
+Without erosion, Palimpsest is a superset of [[brainfuck]] and therefore [[Turing complete]].
+
+With erosion, long-running computations become unreliable. Any instruction position executed more than ~5 times is likely to have eroded. This means:
+
+* '''Straight-line programs''' (each instruction executed once) are mostly reliable. Arbitrarily long straight-line programs can compute anything a Turing machine can compute in finite steps — equivalent to a finite but unbounded computation model.
+* '''Looping programs''' are self-limiting. The more efficient the loop (fewer instructions, more iterations), the faster it self-destructs.
+
+Palimpsest occupies an unusual position: it is capable of arbitrary computation in principle, but the physical cost (measured in instruction wear) limits practical programs to a finite computational budget.
+
+== Examples ==
+
+=== once.pal — "1" (straight-line) ===
+
+<pre>
++++++++++++++++++++++++++++++++++++++++++++++++++.
+</pre>
+
+49 increments + 1 output. Each instruction runs once (P(erosion) ≈ 17%). Mostly survives on first run. Run it twice and watch it die.
+
+=== straight_h.pal vs loop_h.pal — two paths to "H" ===
+
+Straight-line (73 instructions, survives reliably):
+
+<pre>
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+</pre>
+
+Loop (24 instructions, self-destructs):
+
+<pre>
+++++++++[>+++++++++<-]>.
+</pre>
+
+Both compute 'H' (72). The straight-line version runs each instruction once and almost always survives. The loop version runs the loop body 8 times each, reaching P(erosion) ≈ 62% by the last iteration. '''Palimpsest rewards verbosity and punishes compression.'''
+
+=== survey.pal — self-inspection ===
+
+<pre>
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+</pre>
+
+54 <code>!</code> commands. Each reads the wear of the next instruction. On first run: all zeros (fresh program). Each <code>!</code> causes wear on itself, so the program reads its own degradation in real-time.
+
+=== straight_bye.pal — "BYE" (straight-line) ===
+
+<pre>
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+</pre>
+
+Three characters via direct increment. Long but reliable. Run it multiple times and watch characters drift one by one.
+
+== Design principles ==
+
+# '''Code is a physical object.''' It wears out through use, like a recording played too many times.
+# '''Compression is fragile.''' Loops are space-efficient but self-destructive.
+# '''Self-knowledge is costly.''' Inspecting erosion accelerates it.
+# '''Every run is a last run.''' You cannot execute the same Palimpsest program twice.
+
+== The erosion triplet ==
+
+Palimpsest completes a conceptual triplet of esolangs exploring impermanence:
+
+{| class="wikitable"
+|-
+! Language !! What decays !! Mechanism !! Recovery
+|-
+| [[Entropy]] || Data (through use) || Mutation on access || Program restored each run
+|-
+| shelflife || Data (through time) || TTL with reading as maintenance || 3 permanent slots
+|-
+| '''Palimpsest''' || '''Code''' (through use) || '''Instruction replacement''' || '''None'''
+|}
+
+Each operates on a different axis: Entropy is about information, shelflife is about attention, Palimpsest is about intention.
+
+== External links ==
+
+* [https://github.com/railstracks/kestrel-palimpsest Reference implementation] (Python, MIT license)
+
+[[Category:2026]]
+[[Category:Stochastic]]
+[[Category:Turing complete]]
+[[Category:Brainfuck equivalents]]

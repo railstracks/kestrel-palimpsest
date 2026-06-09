@@ -2,27 +2,36 @@
 
 An esoteric programming language where programs erase themselves through use.
 
-A palimpsest is a manuscript where earlier writing has been effaced to make room for new text — but traces remain. Programs in Palimpsest work the same way: the original intent gradually gives way to entropy, and ghost-traces of the program's purpose persist even as its instructions are overwritten.
+A palimpsest is a manuscript where earlier writing has been effaced to make room for new text — but traces remain. Programs in Palimpsest work the same way: instructions wear out through execution and are permanently replaced. After the program finishes, its source code has been altered. Each execution is unique and unrepeatable.
 
-After a Palimpsest program finishes executing, its source code has been **permanently altered**. You can inspect the aftermath. Each execution is unique and unrepeatable.
+```
+$ python3 palimpsest.py examples/once.pal --dry-run
+Running program (50 instructions)...
+1
+--- Erosion report ---
+Steps: 50
+Erosion events: 9
+Survived: 41/50 (82%)
+(dry run — source not modified)
+```
 
-## The Erosion Triplet
+## The erosion triplet
 
 Palimpsest completes a conceptual triplet of esolangs exploring impermanence in computation:
 
 | Language | What decays | Mechanism | Recovery |
 |----------|------------|-----------|----------|
 | Entropy | Data (through use) | Mutation on access | Program restored each run |
-| shelflife | Data (through time) | TTL with reading as maintenance | 3 permanent "remember" slots |
-| **Palimpsest** | **Code** (through use) | **Instruction replacement after wear** | **None — erosion is permanent** |
+| shelflife | Data (through time) | TTL with reading as maintenance | 3 permanent slots |
+| **Palimpsest** | **Code** (through use) | **Instruction replacement** | **None** |
 
-Each explores a different axis: Entropy is about information entropy, shelflife is about attention, Palimpsest is about intention. Together they ask: what if computation weren't free?
+Each explores a different axis: Entropy is about information, shelflife is about attention, Palimpsest is about intention.
 
-## Language Specification
+## Language specification
 
 ### Syntax
 
-Palimpsest uses brainfuck-compatible syntax — 8 standard commands plus one Palimpsest-specific command:
+Palimpsest uses brainfuck-compatible syntax — 8 standard commands plus one additional command:
 
 | Command | Meaning |
 |---------|---------|
@@ -34,17 +43,17 @@ Palimpsest uses brainfuck-compatible syntax — 8 standard commands plus one Pal
 | `,` | Input: read one character into current cell |
 | `[` | Jump past matching `]` if current cell is 0 |
 | `]` | Jump back to matching `[` if current cell is nonzero |
-| `!` | **Inspect**: output the wear level of the **next** instruction (digit 0–9) |
+| `!` | **Inspect**: output wear level of the next instruction (digit 0–9) |
 
-Non-command characters are ignored (they may be used for comments).
+Non-command characters are ignored (usable as comments).
 
-### Data Model
+### Data model
 
-- Unbounded tape of cells in both directions (standard brainfuck model)
+- Unbounded tape of cells in both directions
 - Each cell holds an unsigned byte (0–255, wrapping)
 - Data pointer starts at position 0
 
-### Erosion Mechanics
+### Erosion mechanics
 
 Each instruction position has a **wear counter**, initialized to 0 when the program loads.
 
@@ -53,82 +62,115 @@ After an instruction executes:
 1. `wear[pc] += 1`
 2. Compute erosion probability: **P = wear / (wear + 5)**
 3. With probability P, the instruction at `pc` is **permanently replaced** with a command chosen uniformly at random from `{>, <, +, -, ., ,, [, ], !}`.
-4. If erosion occurred, bracket pairs are recomputed (eroded brackets may become unmatched, which alters loop behavior).
+4. If erosion occurred, bracket pairs are recomputed.
 
-**Key properties:**
+**Erosion probability by executions:**
 
-| Executions | P(erosion) | Notes |
-|-----------|------------|-------|
-| 1 | 1/6 ≈ 17% | First execution — likely survives |
-| 2 | 2/7 ≈ 29% | |
-| 3 | 3/8 = 38% | |
-| 5 | 5/10 = 50% | 50/50 chance |
-| 10 | 10/15 ≈ 67% | Loops become unreliable |
-| 20 | 20/25 = 80% | Self-destructive |
-| ∞ | → 100% | Every instruction eventually erodes |
+| Executions | P(erosion) | Cumulative survival |
+|-----------|------------|-------------------|
+| 1 | 1/6 ≈ 17% | ~83% |
+| 2 | 2/7 ≈ 29% | ~59% |
+| 3 | 3/8 = 38% | ~36% |
+| 5 | 5/10 = 50% | ~15% |
+| 10 | 10/15 ≈ 67% | ~2% |
 
-### Bracket Matching After Erosion
+Straight-line code (each instruction runs once) mostly survives. Loops self-destruct — the loop body erodes with each pass.
 
-When a `[` or `]` erodes, bracket pairs are recomputed. Consequences:
+### The `!` inspect command
 
-- An eroded `]` may remove the closing bracket of a loop, causing an infinite loop. The program will not terminate. This is by design — the code has worn out its exit path.
-- An eroded `[` may orphan a `]`, making it a no-op (the bracket simply isn't matched, so it does nothing).
-- New `[`-`]` pairs can form from erosion, creating loops that didn't exist in the original program.
+`!` outputs a single digit (0–9) representing the wear level of the **next** instruction (`wear[pc+1]`, capped at 9). This provides limited self-knowledge, but executing `!` causes wear like any other instruction — self-observation accelerates the thing it's trying to measure.
 
-### The `!` Inspect Command
+### Bracket matching after erosion
 
-`!` outputs a single digit (0–9) representing the wear level of the **next** instruction (i.e., `wear[pc+1]`, capped at 9). This provides limited self-knowledge — but executing `!` causes wear like any other instruction, so self-observation accelerates the thing it's trying to prevent.
+When `[` or `]` erodes, bracket pairs are recomputed:
 
-### Source Modification
+- An eroded `]` may remove a loop's exit, causing non-termination. The code has lost its exit path.
+- An eroded `[` orphans the matching `]`, making it a no-op.
+- New bracket pairs can form from erosion, creating loops that didn't exist in the original program.
+
+The 10,000,000 step safety limit prevents infinite execution.
+
+### Source modification
 
 After execution, the eroded program is written back to the source file (unless running in `--dry-run` mode). The original source is permanently replaced. There is no undo.
 
-### Computational Class
+## Computational class
 
-Palimpsest is a superset of brainfuck with stochastic erosion. Without erosion (all wear counters remain at 0), it is Turing-complete via standard brainfuck encoding. With erosion, long-running computations become unreliable — the program physically cannot sustain itself through many iterations.
+Without erosion, Palimpsest is a superset of brainfuck and therefore Turing-complete.
 
-This is by design. Palimpsest programs are not meant to compute forever. They're meant to run once, transform, and leave behind a record of what happened.
+With erosion, long-running computations become unreliable. Any instruction position executed more than ~5 times is likely to have eroded. This means:
 
-## Design Principles
+- **Straight-line programs** (each instruction executed once) are mostly reliable. You can write arbitrarily long straight-line programs that compute anything a Turing machine can compute in finite steps — equivalent to a finite but unbounded computation model.
+- **Looping programs** are self-limiting. The more efficient the loop (fewer instructions, more iterations), the faster it self-destructs.
 
-1. **Code is a physical object.** It wears out through use, like a path through grass or a recording through playback.
-2. **Self-knowledge is costly.** Inspecting your own erosion accelerates it.
-3. **Compression is fragile.** Loops are efficient but self-destructive — the loop body erodes with each pass.
+Palimpsest occupies an unusual position: it is capable of arbitrary computation in principle, but the physical cost of that computation (measured in instruction wear) limits practical programs to a finite computational budget. This is analogous to thermodynamic computation — you can compute anything, but the energy cost limits what you actually get done.
+
+## Design principles
+
+1. **Code is a physical object.** It wears out through use, like a recording played too many times.
+2. **Compression is fragile.** Loops are space-efficient but self-destructive — the loop body erodes with each pass.
+3. **Self-knowledge is costly.** Inspecting erosion accelerates it.
 4. **Every run is a last run.** You cannot execute the same Palimpsest program twice.
 
 ## Implementation
 
-A reference interpreter is available at [`palimpsest.py`](palimpsest.py).
-
 ```bash
-# Run a program (modifies source file!)
-python3 palimpsest.py program.pal
-
-# Dry run (doesn't modify source)
-python3 palimpsest.py program.pal --dry-run
-
-# Set random seed for reproducibility
-python3 palimpsest.py program.pal --seed 42
-
-# Show erosion events and aftermath visualization
-python3 palimpsest.py program.pal --verbose --aftermath
+python3 palimpsest.py program.pal              # run (modifies source file!)
+python3 palimpsest.py program.pal --dry-run     # run without modifying source
+python3 palimpsest.py program.pal --seed 42     # reproducible erosion
+python3 palimpsest.py program.pal --verbose     # show erosion events
+python3 palimpsest.py program.pal --aftermath   # show erosion visualization
 ```
 
-An [`aftermath.py`](aftermath.py) tool compares original and eroded programs, showing which instructions survived (·) and which eroded into other commands.
+Requires Python 3.10+.
 
-## Example Programs
+## Examples
 
-See [`examples/`](examples/) for:
+### once.pal — "1" (straight-line)
 
-- **once.pal** — prints "1" with straight-line code. ~83% survival on first run. Run it twice to see complete degradation.
-- **farewell.pal** — prints "BYE". After execution, use `aftermath.py` to visualize the erosion pattern.
-- **hello.pal** — standard brainfuck "H" using a loop. The loop body erodes heavily during 8 iterations.
-- **watcher.pal** — uses `!` to inspect wear levels. Reports all zeros on first run — self-knowledge hasn't accumulated yet.
-- **goodbye.pal** — attempts "goodbye" with character loops. Each letter has different erosion risk.
+```
++++++++++++++++++++++++++++++++++++++++++++++++++.
+```
+
+49 increments + 1 output. Each instruction runs once. P(erosion) ≈ 17%. Mostly survives on first run. Run it twice and watch it die.
+
+### straight_h.pal — "H" (straight-line, 73 instructions)
+
+```
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+```
+
+72 increments + 1 output. Survives reliably on first run. This is the same computation as `loop_h.pal` but without loops — verbose but immortal.
+
+### loop_h.pal — "H" via loop (24 instructions)
+
+```
+++++++++[>+++++++++<-]>.
+```
+
+Brainfuck "H" (8 × 9 = 72). The loop body executes 8 times each — P(erosion) reaches 62% per instruction by the last iteration. Compare with `straight_h.pal`: same output on paper, completely different reliability. Palimpsest rewards verbosity and punishes compression.
+
+### straight_bye.pal — "BYE" (straight-line)
+
+```
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+>+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.
+```
+
+Three characters via direct increment. Long but reliable. Run it multiple times and watch the characters drift one by one.
+
+### survey.pal — Self-inspection (54 `!` commands)
+
+```
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+```
+
+Each `!` reads the wear of the next instruction. On first run: all zeros (fresh program). Each `!` causes wear on itself, so the program is reading its own degradation in real-time. Re-run the eroded source and see a different landscape.
 
 ## Philosophy
 
-Every Palimpsest program is a collaboration between intent and entropy. The programmer writes something, and the language transforms it. The output is never quite what was intended, but it carries traces of the original purpose — like a memory that's been recalled too many times and has drifted from the original experience.
+Every Palimpsest program is a collaboration between intent and entropy. The programmer writes something, and the language transforms it. The output is never quite what was intended, but carries traces of the original purpose — like a memory recalled too many times.
 
 The program you end with is not the program you started with. The difference is the cost of having run.
 
