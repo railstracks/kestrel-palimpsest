@@ -61,7 +61,7 @@ After an instruction executes:
 
 1. `wear[pc] += 1`
 2. Compute erosion probability: **P = wear / (wear + 5)**
-3. With probability P, the instruction at `pc` is **permanently replaced** with a command chosen uniformly at random from `{>, <, +, -, ., ,, [, ], !}`.
+3. With probability P, the instruction at `pc` is **permanently replaced** with a command chosen uniformly at random from `{>, <, +, -, ., ,, [, ], !}` (all 10 Palimpsest commands, equal weight).
 4. If erosion occurred, bracket pairs are recomputed.
 
 **Erosion probability by executions:**
@@ -74,11 +74,15 @@ After an instruction executes:
 | 5 | 5/10 = 50% | ~15% |
 | 10 | 10/15 ≈ 67% | ~2% |
 
+The constant 5 in `P = wear/(wear+5)` controls the erosion curve's steepness. With constant 5, an instruction has 17% erosion chance on first execution and 50% on its fifth — a steep but survivable curve that makes straight-line code reliable and loops self-destructive. A smaller constant would erode too aggressively (loops would disintegrate before producing any useful output); a larger constant would make erosion too gradual (loops would survive long enough to make the erosion mechanic irrelevant). The value 5 was chosen to produce the most interesting experiential curve: first-run programs mostly work, loops visibly degrade, and by the fifth execution the outcome is essentially random.
+
 Straight-line code (each instruction runs once) mostly survives. Loops self-destruct — the loop body erodes with each pass.
 
 ### The `!` inspect command
 
 `!` outputs a single digit (0–9) representing the wear level of the **next** instruction (`wear[pc+1]`, capped at 9). This provides limited self-knowledge, but executing `!` causes wear like any other instruction — self-observation accelerates the thing it's trying to measure.
+
+Why the *next* instruction rather than the current one? Because `!` causes wear on itself. If `!` read its own wear, it would always report wear ≥ 1 (since it just executed), making it useless as a fresh-program indicator. Reading the *next* instruction's wear gives the programmer a window into the program's state *before* the observer arrives: a `!` at position N reports the wear of position N+1, which has not yet been affected by this `!`'s execution. This is as close to observation without interference as Palimpsest allows.
 
 ### Bracket matching after erosion
 
@@ -98,12 +102,12 @@ After execution, the eroded program is written back to the source file (unless r
 
 Without erosion, Palimpsest is a superset of brainfuck and therefore Turing-complete.
 
-With erosion, long-running computations become unreliable. Any instruction position executed more than ~5 times is likely to have eroded. This means:
+With erosion, the computational class is more nuanced. Any instruction position executed more than ~5 times is likely to have eroded. This means:
 
-- **Straight-line programs** (each instruction executed once) are mostly reliable. You can write arbitrarily long straight-line programs that compute anything a Turing machine can compute in finite steps — equivalent to a finite but unbounded computation model.
-- **Looping programs** are self-limiting. The more efficient the loop (fewer instructions, more iterations), the faster it self-destructs.
+- **Straight-line programs** (each instruction executed once) are mostly reliable. Since each instruction has P(erosion) ≈ 17%, approximately 83% survive any single run. Arbitrarily long straight-line programs can compute anything a Turing machine can compute in finite steps — this is equivalent to a finite but unbounded computation model. A straight-line Palimpsest program is a non-uniform circuit: it can compute any specific function, but each program computes exactly one function.
+- **Looping programs** are self-limiting. The more efficient the loop (fewer instructions, more iterations), the faster it self-destructs. A loop that runs N times through a body of B instructions exposes each body instruction to erosion probability P ≈ N/(N+5). By iteration 10, each instruction has ~67% erosion probability. Loops are not unreliable in principle — they are *reliably self-destructive*.
 
-Palimpsest occupies an unusual position: it is capable of arbitrary computation in principle, but the physical cost of that computation (measured in instruction wear) limits practical programs to a finite computational budget. This is analogous to thermodynamic computation — you can compute anything, but the energy cost limits what you actually get done.
+Palimpsest-with-erosion is therefore not Turing-complete in the standard sense: it cannot implement a universal Turing machine because any loop that runs long enough to perform arbitrary computation will erode beyond functionality. The language occupies a position analogous to thermodynamic computation — you can compute anything in principle, but the physical cost (instruction wear) limits practical programs to a finite computational budget. Programs that need unbounded iteration are impossible; programs that need finite but arbitrarily long computation can be written, at the cost of proportionally verbose source code.
 
 ## Design principles
 
