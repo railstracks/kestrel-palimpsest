@@ -172,13 +172,13 @@ Three characters, each built with direct increments. On first run, it produces `
 
 ```
 Run 1: HEY
-Run 2: 012233415250050033
-Run 3: 0500010000ÿ00110000
-Run 4: 000010000ÿ0ÿ0
-Run 5: 00
+Run 2: ·01000···3··2··1··5···0··0···0
+Run 3: ·0122·01·2·3···112001····5·0·000···0·00
+Run 4: ····00·0··00··0··0··0·11·····02···3·343·····00·00
+Run 5: ·040560···000··000·0··0000·0··000··0112·11··23·2··2·22···0000·000
 ```
 
-Each run is unique and unrepeatable. The program you wrote becomes a different program.
+Each run is unique and unrepeatable. The program you wrote becomes a different program. The `!` commands left by erosion produce digit output; cell operations produce non-printable bytes (shown as `·`). The program converges toward noise.
 
 ### observer.pal — Self-aware loop (16 instructions)
 
