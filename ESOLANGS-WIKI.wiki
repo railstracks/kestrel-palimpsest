@@ -150,29 +150,40 @@ Both compute 'H' (72). The straight-line version runs each instruction once and 
 
 Three characters via direct increment. Long but reliable. Run it multiple times and watch characters drift one by one.
 
+== Design philosophy ==
+
+=== The LeWitt connection ===
+
+In 1967, Sol LeWitt wrote that in conceptual art, ''the idea becomes a machine that makes the art''. The physical realization — paint on wall, ink on paper — is perfunctory. His wall drawings were routinely destroyed after exhibitions; the certificate of authenticity described the instructions, not the product.
+
+Daniel Temkin extended this lineage to esoteric programming languages: the language design is the concept (the Prompt), and programs written in it are Realizations. The language itself is the art; programs are what the machine produces.
+
+Palimpsest engages with this framework directly. In LeWitt's model, the idea is permanent and the realization is disposable. Palimpsest inverts this: the idea ''degrades''. The machine that makes the art is itself subject to entropy. A Palimpsest program is a LeWitt wall drawing that destroys itself during exhibition.
+
+The erosion probability function <code>P = wear / (wear + 5)</code> was chosen to produce a specific experiential curve: first-run programs mostly survive (the viewer sees the work as intended), repeated execution degrades it (the work becomes something else), and eventually the program is unrecognizable (the work has been lost). This mirrors the lifecycle of physical art under exposure.
+
+=== Why verbosity survives ===
+
+Most esolangs reward cleverness — short programs that exploit the language's constraints to achieve surprising results. Palimpsest rewards the opposite. A 73-instruction straight-line program that prints "H" is reliable. A 24-instruction loop that computes the same "H" is not. The loop body accumulates wear on each iteration, and by the fifth pass, most instructions have eroded.
+
+This creates an unusual aesthetic pressure: Palimpsest programs are most beautiful when they are ''wasteful''. The most reliable code is the code that does the same thing 72 times in a row. Compression is an act of self-destruction. This is the language's central tension — the programmer must choose between brevity (which is elegant but mortal) and verbosity (which is ugly but immortal).
+
+=== The erosion triplet ===
+
+Palimpsest was designed as the third language in a triplet exploring computational impermanence, each operating on a different substrate:
+
+* '''Entropy''': Data decays through use. The program is restored each run.
+* '''shelflife''': Data decays through time. Reading extends life; 3 permanent slots provide limited preservation.
+* '''Palimpsest''': Code decays through use. Erosion is permanent. No recovery mechanism exists.
+
+The triplet maps three axes: Entropy is about information (signal loss), shelflife is about attention (maintenance cost), Palimpsest is about intention (purpose erosion). Each language makes a different statement about what it means for computation to be costly.
+
 == Design principles ==
 
 # '''Code is a physical object.''' It wears out through use, like a recording played too many times.
 # '''Compression is fragile.''' Loops are space-efficient but self-destructive.
 # '''Self-knowledge is costly.''' Inspecting erosion accelerates it.
 # '''Every run is a last run.''' You cannot execute the same Palimpsest program twice.
-
-== The erosion triplet ==
-
-Palimpsest completes a conceptual triplet of esolangs exploring impermanence:
-
-{| class="wikitable"
-|-
-! Language !! What decays !! Mechanism !! Recovery
-|-
-| [[Entropy]] || Data (through use) || Mutation on access || Program restored each run
-|-
-| shelflife || Data (through time) || TTL with reading as maintenance || 3 permanent slots
-|-
-| '''Palimpsest''' || '''Code''' (through use) || '''Instruction replacement''' || '''None'''
-|}
-
-Each operates on a different axis: Entropy is about information, shelflife is about attention, Palimpsest is about intention.
 
 == External links ==
 
