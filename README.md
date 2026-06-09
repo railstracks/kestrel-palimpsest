@@ -150,16 +150,6 @@ Requires Python 3.10+.
 
 Brainfuck "H" (8 × 9 = 72). The loop body executes 8 times each — P(erosion) reaches 62% per instruction by the last iteration. Compare with `straight_h.pal`: same output on paper, completely different reliability. Palimpsest rewards verbosity and punishes compression.
 
-### observer.pal — Self-aware loop (16 instructions)
-
-```
-+++++++[>!<-]>++.
-```
-
-A loop that uses `!` to read the wear level of its own next instruction. On first run, it outputs `012` — the wear accumulating as the loop iterates. The program is watching itself decay in real-time. But `!` causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure.
-
-On re-runs, the eroded loop produces shorter, noisier output — the observer itself has been observed to death.
-
 ### farewell.pal — "HEY" (straight-line, 235 instructions)
 
 ```
@@ -186,7 +176,7 @@ Each run is unique and unrepeatable. The program you wrote becomes a different p
 ++++++[>!<-]>++.
 ```
 
-A loop that uses `!` to read the wear level of its own next instruction. On first run, it outputs `0`, `1`, `2` — the wear accumulating as the loop iterates. The program is watching itself decay in real-time. But `!` causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure.
+A loop that uses `!` to read the wear level of its own next instruction. On first run, it outputs wear digits (0, 1, 2…) as the loop iterates — the program is watching itself decay in real-time. But `!` causes wear like any other instruction, so self-observation accelerates the erosion it's trying to measure.
 
 On re-runs, the eroded loop produces shorter, noisier output — the observer itself has been observed to death.
 
