@@ -141,8 +141,10 @@ def run(program, dry_run=False, seed=None):
             instructions[pc] = new
             if old != new:
                 erosion_events.append((pc, old, new, wear[pc]))
-                # Rebuild bracket map after any erosion
-                brackets = match_brackets(instructions)
+            # Rebuild bracket map after every erosion check
+            # (even if replacement happened to be the same command,
+            # the wear state has changed)
+            brackets = match_brackets(instructions)
         
         pc += 1
         steps += 1

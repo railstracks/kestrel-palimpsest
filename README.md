@@ -89,10 +89,15 @@ Why the *next* instruction rather than the current one? Because `!` causes wear 
 When `[` or `]` erodes, bracket pairs are recomputed:
 
 - An eroded `]` may remove a loop's exit, causing non-termination. The code has lost its exit path.
-- An eroded `[` orphans the matching `]`, making it a no-op.
+- An eroded `[` degrades the loop into a **single-pass conditional**: the body executes once (if the cell is nonzero) instead of looping. The loop isn't dead — it's demoted.
+- An orphaned `]` (matching `[` eroded) becomes a no-op.
 - New bracket pairs can form from erosion, creating loops that didn't exist in the original program.
 
 The 10,000,000 step safety limit prevents infinite execution.
+
+### Erosion events
+
+The interpreter counts and reports erosion events — instructions that were actually replaced with a different command. Erosion *attempts* that happen to replace a command with itself (e.g. `+` → `+`) are not counted in the event total, but the wear counter still increments and bracket pairs are still recomputed. This means the "erosion events" count in the report may understate the total wear activity.
 
 ### Source modification
 

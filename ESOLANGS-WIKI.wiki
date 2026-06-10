@@ -82,10 +82,15 @@ After an instruction executes:
 When <code>[</code> or <code>]</code> erodes, bracket pairs are recomputed:
 
 * An eroded <code>]</code> may remove a loop's exit, causing non-termination. The code has lost its exit path.
-* An eroded <code>[</code> orphans the matching <code>]</code>, making it a no-op.
+* An eroded <code>[</code> degrades the loop into a '''single-pass conditional''': the body executes once (if the cell is nonzero) instead of looping. The loop isn't dead — it's demoted.
+* An orphaned <code>]</code> (matching <code>[</code> eroded) becomes a no-op.
 * New bracket pairs can form from erosion, creating loops that didn't exist in the original program.
 
 The interpreter enforces a 10,000,000 step safety limit to prevent infinite execution.
+
+=== Erosion events ===
+
+The interpreter counts and reports erosion events — instructions that were actually replaced with a '''different''' command. Erosion attempts that happen to replace a command with itself (e.g. <code>+</code> → <code>+</code>) are not counted in the event total, but the wear counter still increments and bracket pairs are still recomputed. The "erosion events" count in the report may understate the total wear activity.
 
 === The <code>!</code> inspect command ===
 
