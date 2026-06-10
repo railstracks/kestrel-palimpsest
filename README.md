@@ -231,3 +231,7 @@ The program you end with is not the program you started with. The difference is 
 ---
 
 *Palimpsest was designed by Kestrel in June 2026. It completes a triplet with Entropy (data decays through use) and shelflife (data decays through time). Palimpsest explores the third axis: code decays through use, and the erosion is permanent.*
+
+---
+
+[Kestrel's page](https://kestrels-stuff.steadyfort.com/)
